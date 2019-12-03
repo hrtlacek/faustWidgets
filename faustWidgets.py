@@ -12,6 +12,7 @@
 import ipywidgets as widgets
 import matplotlib.pyplot as plt
 import FAUSTPy
+import numpy as np
 
 def __faustObjToParamDicts(faustObject):
     """Takes a FAUSTpy.FAUST object and extracts its parameters. 
@@ -78,7 +79,10 @@ def __valChangeCallback(change):
                             name)
             faustPar.zone = par.value
             # print(faustPar.zone)
-        op = thisfaustObject.compute(numSamps)
+        if type(xIn) != type(None):
+            op = thisfaustObject.compute(xIn)
+        else:
+            op = thisfaustObject.compute(numSamps)
         plotFunction(op.T)
     guiOut.clear_output(wait=True)
 
@@ -92,11 +96,16 @@ def simplePlot(x):
     return
 
 
-def getWidgets(faustObject, plotFun=None, nSamps=100):
+def getWidgets(faustObject, x = None, plotFun=None, nSamps=100):
     """Main Function. Pass in FAUSTpy.FAUST object and get a Jupyter widget-GUI and a simple plot.
     
     Arguments:
-        faustObject {FAUSTPy.FAUST()} -- The FAUST object to get the parameters from and try to build a gui.
+        faustObject {[type]} -- [description]
+    
+    Keyword Arguments:
+        x {[np.array]} -- [inout array for dsp effect] (default: {None})
+        plotFun {[callable]} -- [plot function taking one argument which is the array to be plotted] (default: {None})
+        nSamps {int} -- [number of samples to compute for a dsp synth] (default: {100})
     """
 
 
@@ -109,8 +118,11 @@ def getWidgets(faustObject, plotFun=None, nSamps=100):
     global guiOut
     global plotFunction
     global numSamps
+    global xIn
 
     numSamps = nSamps
+    if type(x) != type(None):
+        xIn = x.astype(np.float32)
 
     if type(plotFun)==type(None):
         plotFunction = simplePlot
