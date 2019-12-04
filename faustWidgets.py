@@ -73,17 +73,23 @@ def __valChangeCallback(change):
     """
 
     with guiOut:
-        for par in thisUI.children:
+        parcollection = thisUI.children
+        pardict = {}
+        for par in parcollection:
             name = par.description
             faustPar = eval('thisfaustObject.dsp.b_' + thisObjName + '.' +
                             name)
             faustPar.zone = par.value
+            pardict[name]=par.value
             # print(faustPar.zone)
         if type(xIn) != type(None):
             op = thisfaustObject.compute(xIn)
         else:
             op = thisfaustObject.compute(numSamps)
-        plotFunction(op.T)
+        try:
+            plotFunction(op.T)
+        except TypeError:
+            plotFunction(op.T, pardict)
     guiOut.clear_output(wait=True)
 
     return
@@ -123,6 +129,8 @@ def getWidgets(faustObject, x = None, plotFun=None, nSamps=100):
     numSamps = nSamps
     if type(x) != type(None):
         xIn = x.astype(np.float32)
+    else:
+        xIn = x
 
     if type(plotFun)==type(None):
         plotFunction = simplePlot
